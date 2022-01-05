@@ -57,4 +57,4 @@ Run:
     cycle_time=2   # kline span in seconds
 
 
-
+Only tested on Fedora, but using on other platforms should be easy.
