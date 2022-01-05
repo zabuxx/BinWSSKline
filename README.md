@@ -10,7 +10,7 @@ Required packages:
 * Boost >= 1.73
 
 
-# Usage Installations instructions
+# Usage instructions
 
 Install necessary Packagess (Fedora/CentOS):
 
@@ -38,5 +38,23 @@ Prepare database:
 Run:
 
     (myuser)$ ./build/src/WSKline -c prodnet.cfg -v5
+   
+ # Configuration
+ 
+ Configuration happens with the config files, the syntax should be self-explaining
+ 
+    psql=postgresql:///exchange
+    logfile=/tmp/BinWSSKline-testnet.log
+    logfile-lvl=5
+    perf_detail=true
+    
+    [binance]
+    api=api.binance.com
+    wss=stream.binance.com
+    wssport=9443
+
+    [kline]
+    cycle_time=2   # kline span in seconds
+
 
 
