@@ -39,6 +39,21 @@ Run:
 
     (myuser)$ ./build/src/WSKline -c prodnet.cfg -v5
    
+ # Output
+ 
+ The output is written to the configured database in the table kline. You can use this table for your TI calculations.
+ 
+     exchange=> select * from kline where symbol =  'ETHBTC' order by tstamp;
+       tstamp   | symbol |   open    |    min    |    max    |   close   
+    ------------+--------+-----------+-----------+-----------+-----------
+    1641410814 | ETHBTC |  0.081152 | 0.0811485 |  0.081152 | 0.0811485
+    1641410824 | ETHBTC | 0.0811485 | 0.0811485 |  0.081161 | 0.0811555
+    1641410834 | ETHBTC | 0.0811555 | 0.0811535 | 0.0811625 | 0.0811585
+    1641410844 | ETHBTC | 0.0811585 | 0.0811565 | 0.0811635 | 0.0811565
+    1641410854 | ETHBTC | 0.0811565 | 0.0811555 | 0.0811645 | 0.0811645
+    1641410864 | ETHBTC | 0.0811645 | 0.0811645 | 0.0811835 | 0.0811815
+    (6 rows)
+ 
  # Configuration
  
  Configuration happens with the config files, the syntax should be self-explaining
