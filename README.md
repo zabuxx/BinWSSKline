@@ -1,4 +1,7 @@
 # BinWSSKline
+
+![CMake workflow](https://github.com/zabuxx/BinWSSKline/actions/workflows/cmake.yml/badge.svg)
+
 Use Binance WSS stream to store local custom candlestick DB with arbitrary lengths (up to 1s)
 
 This C++ program subscribes to the Binance Web Socket Stream to update a local database with candlestick data for all actively traded spot market pairs.
