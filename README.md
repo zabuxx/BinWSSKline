@@ -1,5 +1,5 @@
 # BinWSSKline
-Use Binance WSS stream to store local custom candlestick DB with arbitrari length (up to 1s)
+Use Binance WSS stream to store local custom candlestick DB with arbitrary lengths (up to 1s)
 
 This C++ program subscribes to the Binance Web Socket Stream to update a local database with candlestick data for all actively traded spot market pairs.
 
