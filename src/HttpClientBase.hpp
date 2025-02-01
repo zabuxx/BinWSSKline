@@ -43,8 +43,9 @@ protected:
     beast::ssl_stream<beast::tcp_stream> stream_;
     beast::flat_buffer buffer_;  // must persist between reads
     http::request<http::empty_body> req_;
-    http::response<http::string_body> res_;
+    http::response_parser<http::string_body> res_parser_;
 
+    
     string hostname;
 
 protected:

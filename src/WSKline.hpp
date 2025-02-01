@@ -32,8 +32,9 @@ using namespace std;
 
 class WSKline : public WSBase {
     //TODO: accumulator is too heavy in current form, can be reduced to better suit db needed data  
-    //typedef acc::accumulator_set<curfloat, acc::stats<acc::tag::min, acc::tag::max, acc::tag::mean, acc::tag::first, acc::tag::last > > SymbAcc;
-    typedef acc::accumulator_set<curfloat, acc::stats<acc::tag::min, acc::tag::max, acc::tag::first, acc::tag::last > > SymbAcc;
+
+    typedef acc::accumulator_set<curfloat, acc::stats<acc::tag::min, acc::tag::max, acc::tag::mean, acc::tag::first, acc::tag::last > > SymbAcc;
+    //typedef acc::accumulator_set<curfloat, acc::stats<acc::tag::min, acc::tag::max, acc::tag::first, acc::tag::last > > SymbAcc;
 
     map<string, SymbAcc> klinemap_;
     const set<string>& active_symbols_;

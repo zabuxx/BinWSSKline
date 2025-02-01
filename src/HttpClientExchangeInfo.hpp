@@ -24,12 +24,13 @@ class HttpClientExchangeInfo : public HttpClientBase {
             return;
         }
 
-        stringstream ss(res_.body());
+	auto& res = res_parser_.get();
+        stringstream ss(res.body());
         pt::ptree pt;
         pt::read_json(ss, pt);
 
         if(pt.count("symbols") == 0) {
-            LOG(fatal) << "HttpClientExchangeInfo: JSON parse error!" << res_.body();
+            LOG(fatal) << "HttpClientExchangeInfo: JSON parse error!" << res.body();
 	    assert(false);
             return;
         }

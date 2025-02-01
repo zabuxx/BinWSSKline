@@ -13,6 +13,7 @@ HttpClientBase::HttpClientBase(net::io_context& ioc, ssl::context& ctx) :
     req_.method(http::verb::get);
     
     req_.set(http::field::user_agent, BOOST_BEAST_VERSION_STRING);
+    res_parser_.body_limit(std::numeric_limits<uint64_t>::max());
 }
 
 void HttpClientBase::get(const string& host, const string& uri) {
@@ -121,7 +122,7 @@ void HttpClientBase::on_write(beast::error_code ec, std::size_t bytes_transferre
     } */
 
     // Receive the HTTP response
-    http::async_read(stream_, buffer_, res_,
+    http::async_read(stream_, buffer_, res_parser_,
         beast::bind_front_handler(
             &HttpClientBase::on_read,
             shared_from_this()));
@@ -144,14 +145,16 @@ void HttpClientBase::on_read(beast::error_code ec,std::size_t bytes_transferred)
         
     } */
 
-    if(res_.result_int() != 200) {
-        LOG(warning) << "HttpClientBase: ret code = " << res_.result_int();
+    auto& res = res_parser_.get();
+    
+    if(res.result_int() != 200) {
+        LOG(warning) << "HttpClientBase: ret code = " << res.result_int();
     }
     
     //check binance x-mbx headers:
     
     stringstream log_msg;
-    for(auto const& field: res_) {
+    for(auto const& field: res) {
         const string field_name = boost::to_upper_copy(string(field.name_string()));
         
         if(field_name.rfind("X-MBX", 0) == 0) {

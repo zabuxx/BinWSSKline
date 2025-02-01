@@ -2,9 +2,12 @@
 #include <time.h>
 #include <mutex>
 #include <thread>
+#include <regex>
+
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include "Types.hpp"
 #include "Options.hpp"
@@ -25,7 +28,7 @@ WSKline::WSKline(net::io_context& ioc,
 {
     csql_.prepare(
         "insert",
-        "insert into kline(tstamp, symbol, open, min, max, close) values ($1, $2, $3, $4, $5, $6)");
+        "insert into kline(tstamp, symbol, open, min, max, close, mean) values ($1, $2, $3, $4, $5, $6, $7)");
 
 
     ostringstream l1;
@@ -54,7 +57,7 @@ void WSKline::time_cycle_kline() {
         const curfloat min_price = extract_result<acc::tag::min >(klinemap_[symb]);
         const curfloat max_price = extract_result<acc::tag::max >(klinemap_[symb]);
         const curfloat close_price = extract_result<acc::tag::last >(klinemap_[symb]);
-
+	const curfloat mean_price = extract_result<acc::tag::mean >(klinemap_[symb]);
 
         w.exec_prepared("insert",
                         last_second_ - options.val<int>("kline.cycle_time") / 2,
@@ -62,7 +65,9 @@ void WSKline::time_cycle_kline() {
                         open_price,
                         min_price,
                         max_price,
-                        close_price);
+                        close_price,
+			mean_price
+	    );
 
         this->klinemap_[symb] = SymbAcc();
         this->klinemap_[symb](close_price);
@@ -92,16 +97,16 @@ void WSKline::process_data(const string& buf) {
     if(pt.count("code")) {
         LOG(warning) << "WSKline: recieved error: " << pt.get<string>("msg");
         return;
-    } else if(pt.count("a") == 0 || pt.count("b") == 0 || pt.count("s") == 0) {
+    } else if(pt.count("data") == 0 || pt.get_child("data").count("a") == 0 || pt.get_child("data").count("b") == 0 || pt.get_child("data").count("s") == 0) {
         LOG(warning) << "WSKline: unknown message format: " << buf;
         return;
     }
 
-    const curfloat ask = stold(pt.get<string>("a"));
-    const curfloat bid = stold(pt.get<string>("b"));
+    const curfloat ask = stold(pt.get_child("data").get<string>("a"));
+    const curfloat bid = stold(pt.get_child("data").get<string>("b"));
 
     const curfloat price = (ask + bid)/2;
-    const string symbol = pt.get<string>("s");
+    const string symbol = boost::algorithm::to_lower_copy(pt.get_child("data").get<string>("s"));
 
     const auto sit = find(active_symbols_.begin(), active_symbols_.end(), symbol);
     if(sit != active_symbols_.end()) {
@@ -111,5 +116,19 @@ void WSKline::process_data(const string& buf) {
 }
 
 void WSKline::run() {
-    WSBase::run(options.val<string>("binance.wss"),options.val<string>("binance.wssport"),"/ws/!bookTicker");
+    string cmd = "/stream?streams=";
+
+    bool first = true;
+
+    for(const auto& pair: active_symbols_) {
+	
+	if(!first)
+	    cmd += "/";
+	else 
+	    first = false;
+	
+	cmd += pair + "@bookTicker";
+    }
+    
+    WSBase::run(options.val<string>("binance.wss"),options.val<string>("binance.wssport"),cmd);
 }
