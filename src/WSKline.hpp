@@ -37,7 +37,7 @@ class WSKline : public WSBase {
     //typedef acc::accumulator_set<curfloat, acc::stats<acc::tag::min, acc::tag::max, acc::tag::first, acc::tag::last > > SymbAcc;
 
     map<string, SymbAcc> klinemap_;
-    const set<string>& active_symbols_;
+    const map<string, pair<string, string>>& active_symbols_;
 
     pqxx::connection csql_;
     time_t last_second_;
@@ -48,7 +48,7 @@ class WSKline : public WSBase {
     void process_data(const string&);
     void time_cycle_kline();
 public:
-    WSKline(net::io_context&, ssl::context&,const set<string>&,const map<string,curfloat>&);
+    WSKline(net::io_context&, ssl::context&,const map<string, pair<string, string>>&,const map<string,curfloat>&);
 
     void run();
 };

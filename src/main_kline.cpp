@@ -18,10 +18,10 @@ int main(int argc, char* argv[]) {
     net::io_context ioc;
     ssl::context ctx(ssl::context::tlsv12_client);
 
-    set<string> all_active_symbols;
+    map<string, pair<string, string>> active_symbols;
     bool had_success;
     do {
-        auto hcei = make_shared<HttpClientExchangeInfo>(ioc, ctx, all_active_symbols);
+        auto hcei = make_shared<HttpClientExchangeInfo>(ioc, ctx, active_symbols);
         hcei->fetch();
         ioc.run();
         ioc.restart();
@@ -34,18 +34,9 @@ int main(int argc, char* argv[]) {
 
     } while(!had_success);
 
-    set<string> active_symbols;
-    for(auto& pair: all_active_symbols) 
-	if(regex_search(pair, regex("BTC|BNB|SOL|ETH|TRY|XRP"))) 
-	    active_symbols.insert(boost::algorithm::to_lower_copy(pair));
-
-
     if(active_symbols.size() > 1024) {
 	LOG(warning) << "More than 1024 filtered active symbols: " << active_symbols.size();
-    } else {
-	LOG(trace) << "Filtered ctive symbols: " << active_symbols.size();
-    }
-    
+    } 
 	
     map<string, curfloat> symbols_price;
     do {

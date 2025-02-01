@@ -12,3 +12,11 @@ CREATE TABLE kline (
 );
 
 
+DROP TABLE IF EXISTS pairs;
+
+CREATE TABLE pairs (
+       symbol VARCHAR(32),
+       base VARCHAR(32),
+       quote VARCHAR(32),
+       PRIMARY KEY(symbol)
+       );

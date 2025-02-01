@@ -17,7 +17,7 @@ namespace pt = boost::property_tree;
 
 WSKline::WSKline(net::io_context& ioc, 
                  ssl::context& ctx, 
-                 const set<string>& active_symbols,
+                 const map<string, pair<string, string>>& active_symbols,
                  const map<string,curfloat>& symbols_price) :
       WSBase(ioc, ctx),
       active_symbols_(active_symbols),
@@ -59,15 +59,17 @@ void WSKline::time_cycle_kline() {
         const curfloat close_price = extract_result<acc::tag::last >(klinemap_[symb]);
 	const curfloat mean_price = extract_result<acc::tag::mean >(klinemap_[symb]);
 
-        w.exec_prepared("insert",
+	w.exec(pqxx::prepped{"insert"},
+	       pqxx::params(
                         last_second_ - options.val<int>("kline.cycle_time") / 2,
                         symb,
                         open_price,
                         min_price,
                         max_price,
                         close_price,
-			mean_price
+			mean_price)
 	    );
+
 
         this->klinemap_[symb] = SymbAcc();
         this->klinemap_[symb](close_price);
@@ -79,7 +81,8 @@ void WSKline::time_cycle_kline() {
 
 void WSKline::process_data(const string& buf) {
     counter_++;
-
+    
+    
     if(last_second_ + (options.val<int>("kline.cycle_time") - 1) < time(0)) {
         time_cycle_kline();
 
@@ -108,10 +111,11 @@ void WSKline::process_data(const string& buf) {
     const curfloat price = (ask + bid)/2;
     const string symbol = boost::algorithm::to_lower_copy(pt.get_child("data").get<string>("s"));
 
-    const auto sit = find(active_symbols_.begin(), active_symbols_.end(), symbol);
-    if(sit != active_symbols_.end()) {
-        klinemap_[symbol](price);
+    //const auto sit = find(active_symbols_.begin(), active_symbols_.end(), symbol);
+    //if(sit != active_symbols_.end()) {
     
+    if(active_symbols_.find(symbol) != active_symbols_.end()) {
+        klinemap_[symbol](price);
     }
 }
 
@@ -127,7 +131,7 @@ void WSKline::run() {
 	else 
 	    first = false;
 	
-	cmd += pair + "@bookTicker";
+	cmd += pair.first + "@bookTicker";
     }
     
     WSBase::run(options.val<string>("binance.wss"),options.val<string>("binance.wssport"),cmd);

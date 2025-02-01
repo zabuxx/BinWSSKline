@@ -18,7 +18,7 @@ using namespace std;
 
 
 class HttpClientPrice : public HttpClientBase {
-    const set<string>& active_symbols_;
+    const map<string, pair<string, string>>& active_symbols_;
     map<string, curfloat>& symbols_price_;
 
 
@@ -33,11 +33,14 @@ class HttpClientPrice : public HttpClientBase {
         pt::ptree pt;
         pt::read_json(ss, pt);
 
+	
+	
         for(auto& prec: pt) {
             const string symbol = boost::algorithm::to_lower_copy(prec.second.get<string>("symbol"));
-
-            if(find(active_symbols_.begin(), active_symbols_.end(), symbol) != active_symbols_.end())
-                symbols_price_[symbol] = stold(prec.second.get<string>("price"));   
+	    if(active_symbols_.find(symbol) != active_symbols_.end()) {
+		symbols_price_[symbol] = stold(prec.second.get<string>("price"));
+	    }
+	    
         }
 
         { LOG(trace) << "HttpClientPrice: loaded " << symbols_price_.size() << " prices"; }
@@ -48,7 +51,9 @@ public:
         get(options.val<string>("binance.api"), "/api/v3/ticker/price");   
     }
 
-    HttpClientPrice(net::io_context &ioc, ssl::context &ctx, const set<string>& active_symbols, map<string, curfloat>& symbols_price) 
+    HttpClientPrice(net::io_context &ioc, ssl::context &ctx,
+		    const map<string, pair<string, string>>& active_symbols,
+		    map<string, curfloat>& symbols_price) 
     : HttpClientBase(ioc, ctx),
         active_symbols_(active_symbols),
         symbols_price_(symbols_price) {}    
