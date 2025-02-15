@@ -31,9 +31,7 @@ class HttpClientPrice : public HttpClientBase {
 	auto& res = res_parser_.get();
         stringstream ss(res.body());
         pt::ptree pt;
-        pt::read_json(ss, pt);
-
-	
+        pt::read_json(ss, pt);	
 	
         for(auto& prec: pt) {
             const string symbol = boost::algorithm::to_lower_copy(prec.second.get<string>("symbol"));
