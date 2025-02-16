@@ -5,7 +5,7 @@
 
 #include "HttpClientExchangeInfo.hpp"
 #include "HttpClientPrice.hpp"
-#include "WSKline.hpp"
+#include "WSACKLine.hpp"
 
 int main(int argc, char* argv[]) {
     if(!options.parse(argc,argv)) {
@@ -38,21 +38,21 @@ int main(int argc, char* argv[]) {
 	LOG(warning) << "More than 1024 filtered active symbols: " << active_symbols.size();
     } 
 	
-    map<string, curfloat> symbols_price;
-    do {
-        auto hcp = make_shared<HttpClientPrice>(ioc, ctx, active_symbols, symbols_price);
-        hcp->fetch();
-        ioc.run();
-        ioc.restart();
+    // map<string, curfloat> symbols_price;
+    // do {
+    //     auto hcp = make_shared<HttpClientPrice>(ioc, ctx, active_symbols, symbols_price);
+    //     hcp->fetch();
+    //     ioc.run();
+    //     ioc.restart();
 
-        had_success = hcp->success();
-        if(!had_success) {
-            LOG(warning) << "retrying HttpClientPrice";
-        }
-    } while(!had_success);
+    //     had_success = hcp->success();
+    //     if(!had_success) {
+    //         LOG(warning) << "retrying HttpClientPrice";
+    //     }
+    // } while(!had_success);
 
     while(true) {
-        auto wsk = make_shared<WSKline>(ioc, ctx, active_symbols, symbols_price);
+        auto wsk = make_shared<WSACKline>(ioc, ctx, active_symbols);
         wsk->run();
         ioc.run();
         ioc.restart();

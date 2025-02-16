@@ -26,7 +26,6 @@ add_executable(WSKline
     HttpClientBase.cpp
     Options.cpp
     WSBase.cpp
-    WSKline.cpp
 )
 
 
